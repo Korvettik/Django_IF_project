@@ -25,6 +25,7 @@ urlpatterns = [
 
     path('', index, name='index'),  # также добавим имя этого пути, далее пригодится
     path('products/', include('products.urls', namespace='products')),  # префикс
+    path('users/', include('users.urls', namespace='users')),  # префикс
 ]
 
 if settings.DEBUG == True:
