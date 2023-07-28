@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 
 from products.models import ProductCategory, Product, Basket
 from users.models import User
+from django.core.paginator import Paginator
 
 # Create your views here.
 
@@ -14,16 +15,20 @@ def index(request):
     context = {'title': 'Store'}
     return render(request, 'products/index.html', context)
 
-def products(request, category_id=None):
+def products(request, category_id=None, page_number=1):
     if category_id:  # добавляем фильтрацию выбранной категории, если есть в теле запроса
         category = ProductCategory.objects.get(id=category_id)
         products = Product.objects.filter(category=category)
     else:
         products = Product.objects.all()
 
+    per_page = 3  # число товаров на странице
+    paginator = Paginator(products, per_page)
+    products_paginator = paginator.page(page_number)
+
     context= {
         'title': 'Store - Каталог',
-        'products': products,
+        'products': products_paginator,
         'categories': ProductCategory.objects.all()
     }
     return render(request, 'products/products.html', context)
