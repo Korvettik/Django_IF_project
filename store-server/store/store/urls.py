@@ -20,7 +20,7 @@ from django.conf import settings
 
 from products.views import IndexView
 
-from products.views import products  #ничего страшного, что подсвечивает
+# from products.views import products  #ничего страшного, что подсвечивает
 
 urlpatterns = [
     path('admin/', admin.site.urls),
