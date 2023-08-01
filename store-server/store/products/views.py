@@ -1,5 +1,6 @@
 from django.shortcuts import render, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
+from django.views.generic.base import TemplateView
 
 from products.models import ProductCategory, Product, Basket
 from users.models import User
@@ -11,9 +12,18 @@ from django.core.paginator import Paginator
 # Контроллеры можно описать функциями, можно классами
 
 # ОТКУДА БЕРЕТСЯ request ------ это объект входного потока данных HTMLResponse
-def index(request):
-    context = {'title': 'Store'}
-    return render(request, 'products/index.html', context)
+
+class IndexView(TemplateView):
+    template_name = 'products/index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data()
+        context['title'] = 'Store'
+        return context
+
+# def index(request):
+#     context = {'title': 'Store'}
+#     return render(request, 'products/index.html', context)
 
 def products(request, category_id=None, page_number=1):
     if category_id:  # добавляем фильтрацию выбранной категории, если есть в теле запроса

@@ -18,12 +18,17 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
 
-from products.views import index, products  #ничего страшного, что подсвечивает
+from products.views import IndexView
+
+from products.views import products  #ничего страшного, что подсвечивает
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    path('', index, name='index'),  # также добавим имя этого пути, далее пригодится
+    # path('', index, name='index'),  # также добавим имя этого пути, далее пригодится
+    # path('', IndexView.as_view(extra_context={'title': 'Store'}), name='index'),
+    path('', IndexView.as_view(), name='index'),
+
     path('products/', include('products.urls', namespace='products')),  # префикс
     path('users/', include('users.urls', namespace='users')),  # префикс
 ]
