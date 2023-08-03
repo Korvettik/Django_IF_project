@@ -1,7 +1,8 @@
 from django.shortcuts import render, HttpResponseRedirect
 from django.contrib import auth, messages
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.contrib.auth.decorators import login_required
+from django.views.generic.edit import CreateView, UpdateView
 
 from users.models import User
 from users.forms import UserLoginForm, UserRegistrationForm, UserProfileForm
@@ -23,51 +24,83 @@ def login(request):
     return render(request, 'users/login.html', context)
 
 
-def registration(request):
-    if request.method == 'POST':
-        form = UserRegistrationForm(data=request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Регистрация прошла успешно.')
-            return HttpResponseRedirect(reverse('users:login'))
-
-    else:
-        form = UserRegistrationForm()
-    context = {'form': form}
-    return render(request, 'users/registration.html', context)
 
 
-@login_required
-def profile(request):
-    if request.method == 'POST':
-        form = UserProfileForm(instance=request.user, data=request.POST, files=request.FILES)  # для какого пользователя, новые вводимые данные
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse('users:profile'))
-        else:
-            print(form.errors)
-    else:
-       form = UserProfileForm(instance=request.user)
+class UserRegistrationView(CreateView):
+    model = User
+    form_class = UserRegistrationForm
+    template_name = 'users/registration.html'
+    success_url = reverse_lazy('users:login')
 
-    baskets = Basket.objects.filter(user=request.user)  # список объектов корзинок
+    def get_context_data(self, **kwargs):
+        context = super(UserRegistrationView, self).get_context_data()
+        context['title'] = 'Store - Регистрация'
+        return context
 
-    total_sum = sum(basket.sum() for basket in baskets)
-    total_quantity = sum(basket.quantity for basket in baskets)
+# def registration(request):
+#     if request.method == 'POST':
+#         form = UserRegistrationForm(data=request.POST)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, 'Регистрация прошла успешно.')
+#             return HttpResponseRedirect(reverse('users:login'))
+#
+#     else:
+#         form = UserRegistrationForm()
+#     context = {'form': form}
+#     return render(request, 'users/registration.html', context)
 
-    # total_sum = 0
-    # total_quantity = 0
-    # for basket in baskets:
-    #     total_sum = total_sum + basket.sum()
-    #     total_quantity = total_quantity + basket.quantity
 
-    context = {
-        'title': 'Store - Профиль',
-        'form': form,
-        'baskets': baskets,
-        'total_sum': total_sum,
-        'total_quantity': total_quantity,
-    }
-    return render(request, 'users/profile.html', context)
+
+
+
+
+
+class UserProfileView(UpdateView):
+    model = User
+    form_class = UserProfileForm
+    template_name = 'users/profile.html'
+    def get_success_url(self):
+        return reverse_lazy('users:profile', args=self.object.id)
+
+    def get_context_data(self, **kwargs):
+        context = super(UserProfileView, self).get_context_data()
+        context['title'] = 'Store - Личный кабинет'
+        context['baskets'] = Basket.objects.filter(user=self.request.user)
+        return context
+
+
+# @login_required
+# def profile(request):
+#     if request.method == 'POST':
+#         form = UserProfileForm(instance=request.user, data=request.POST, files=request.FILES)  # для какого пользователя, новые вводимые данные
+#         if form.is_valid():
+#             form.save()
+#             return HttpResponseRedirect(reverse('users:profile'))
+#         else:
+#             print(form.errors)
+#     else:
+#        form = UserProfileForm(instance=request.user)
+#
+#     baskets = Basket.objects.filter(user=request.user)  # список объектов корзинок
+#
+#     total_sum = sum(basket.sum() for basket in baskets)
+#     total_quantity = sum(basket.quantity for basket in baskets)
+#
+#     # total_sum = 0
+#     # total_quantity = 0
+#     # for basket in baskets:
+#     #     total_sum = total_sum + basket.sum()
+#     #     total_quantity = total_quantity + basket.quantity
+#
+#     context = {
+#         'title': 'Store - Профиль',
+#         'form': form,
+#         'baskets': baskets,
+#         'total_sum': total_sum,
+#         'total_quantity': total_quantity,
+#     }
+#     return render(request, 'users/profile.html', context)
 
 def logout(request):
     auth.logout(request)

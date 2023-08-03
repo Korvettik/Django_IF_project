@@ -71,8 +71,6 @@ class ProductsListView(ListView):
 
 
 
-
-
 @login_required  # специальный декоратор, чтобы не было возможности
 # добавить в корзину товар неавторизованному пользователю
 def basket_add(request, product_id):
